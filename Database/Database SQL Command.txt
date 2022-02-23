@@ -1,0 +1,149 @@
+CREATE DATABASE kyau_store_management_system;
+CREATE TABLE users_details
+(
+    user_id INTEGER AUTO_INCREMENT NOT NULL,
+    user_name VARCHAR(50) NOT NULL,
+    user_email VARCHAR(50) NOT NULL UNIQUE ,
+    user_mobile VARCHAR(15) NOT NULL UNIQUE,
+    user_department VARCHAR(50) NOT NULL,
+    user_designation VARCHAR(50)NOT NULL,
+    user_password VARCHAR(50)NOT NULL,
+    user_type VARCHAR(15) NOT NULL,
+    user_status enum('inactive','active') NOT NULL,
+    user_create_date VARCHAR(30) NOT NULL,
+    user_image VARCHAR(50) NOT NULL,
+    CONSTRAINT users_details_pk PRIMARY KEY(user_id)   
+);
+
+CREATE TABLE category
+(
+    	category_id INTEGER NOT NULL AUTO_INCREMENT,
+    	category_name VARCHAR(50) NOT NULL UNIQUE,
+	category_status enum('active','inactive') NOT NULL,
+    	CONSTRAINT category_pk PRIMARY KEY(category_id)
+);
+
+CREATE TABLE brand
+(
+    	brand_id INTEGER NOT NULL AUTO_INCREMENT,
+    	category_id INTEGER NOT NULL,
+    	brand_name VARCHAR(50) NOT NULL UNIQUE,
+	brand_status ENUM('active','inactive') NOT NULL,
+    	CONSTRAINT brand_pk PRIMARY KEY(brand_id),
+    	CONSTRAINT category_brand_fk FOREIGN KEY(category_id) REFERENCES category(category_id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE products
+(
+    	product_id INTEGER NOT NULL AUTO_INCREMENT,
+    	category_id INTEGER NOT NULL,
+	brand_id INTEGER NOT NULL,
+    	product_name VARCHAR(50) NOT NULL,
+	product_status enum('active','inactive') NOT NULL,
+    	CONSTRAINT product_pk PRIMARY KEY(product_id),
+    	CONSTRAINT category_product_fk FOREIGN KEY(category_id) REFERENCES category(category_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT brand_product_fk FOREIGN KEY(brand_id) REFERENCES brand(brand_id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+CREATE TABLE warehouse(
+	item_id int NOT NULL AUTO_INCREMENT,
+    	category_id INTEGER NOT NULL,
+	brand_id INTEGER NOT NULL,
+    	product_id INTEGER NOT NULL,
+    	available_qty INTEGER(10),
+    	CONSTRAINT warehouse_pk PRIMARY KEY(item_id),
+   	CONSTRAINT category_warehouse_fk FOREIGN KEY(category_id) REFERENCES category(category_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT brand_warehouse_fk FOREIGN KEY(brand_id) REFERENCES brand(brand_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT product_warehouse_fk FOREIGN KEY(product_id) REFERENCES products(product_id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+CREATE TABLE warehouse_spend_info(
+	item_spend_id int NOT NULL AUTO_INCREMENT,
+    	category_id INTEGER NOT NULL,
+	brand_id INTEGER NOT NULL,
+    	product_id INTEGER NOT NULL,
+    	product_qty INTEGER(10) NOT NULL,
+	product_unit VARCHAR(20) NOT NULL,
+	base_price DOUBLE(10,2) NOT NULL,
+	total_price DOUBLE(10,2) NOT NULL,
+	date varchar(30) NOT NULL,
+    	CONSTRAINT warehouse_spend_pk PRIMARY KEY(item_spend_id ),
+   	CONSTRAINT category_warehouse_spend_fk FOREIGN KEY(category_id) REFERENCES category(category_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT brand_warehouse_spend_fk FOREIGN KEY(brand_id) REFERENCES brand(brand_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT product_warehouse_spend_fk FOREIGN KEY(product_id) REFERENCES products(product_id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+CREATE TABLE users_activity(
+	user_activity_id int NOT NULL AUTO_INCREMENT,
+    	user_id INTEGER NOT NULL,
+	daily_login_date VARCHAR(30) NOT NULL,
+	login_time VARCHAR(10) NOT NULL,
+	logout_time VARCHAR(10) NOT NULL,
+	user_pc_ip VARCHAR(20) NOT NULL,
+    	CONSTRAINT users_activity_pk PRIMARY KEY(user_activity_id),
+   	CONSTRAINT user_users_activity_fk FOREIGN KEY(user_id) REFERENCES users_details(user_id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+CREATE TABLE inventory_requisition(
+	inventory_requisition_id int NOT NULL AUTO_INCREMENT,
+    	user_id INTEGER NOT NULL,
+	category_id INTEGER NOT NULL,
+	brand_id INTEGER NOT NULL,
+    	product_id INTEGER NOT NULL,
+	requisition_qty INTEGER(10) NOT NULL,
+	received_qty INTEGER(10) NOT NULL,
+	status VARCHAR(10) NOT NULL,
+    	CONSTRAINT inventory_requisition_pk PRIMARY KEY(inventory_requisition_id),
+   	CONSTRAINT user_inventory_requisition_fk FOREIGN KEY(user_id) REFERENCES users_details(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT category_inventory_requisition_fk FOREIGN KEY(category_id) REFERENCES category(category_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT brand_inventory_requisition_fk FOREIGN KEY(brand_id) REFERENCES brand(brand_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT product_inventory_requisition_fk FOREIGN KEY(product_id) REFERENCES products(product_id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+CREATE TABLE requisition_inventory_registrar(
+	reg_inv_id int NOT NULL AUTO_INCREMENT,
+    	user_id INTEGER NOT NULL,
+	category_id INTEGER NOT NULL,
+	brand_id INTEGER NOT NULL,
+    	product_id INTEGER NOT NULL,
+	requisition_qty INTEGER(10) NOT NULL,
+	status VARCHAR(10) NOT NULL,
+    	CONSTRAINT requisition_inventory_registrar_pk PRIMARY KEY(reg_inv_id),
+   	CONSTRAINT user_requisition_inventory_registrar_fk FOREIGN KEY(user_id) REFERENCES users_details(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT category_requisition_inventory_registrar_fk FOREIGN KEY(category_id) REFERENCES category(category_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT brand_requisition_inventory_registrar_fk FOREIGN KEY(brand_id) REFERENCES brand(brand_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT product_requisition_inventory_registrar_fk FOREIGN KEY(product_id) REFERENCES products(product_id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+CREATE TABLE issued_items(
+	issued_items_id int NOT NULL AUTO_INCREMENT,
+    	user_id INTEGER NOT NULL,
+	category_id INTEGER NOT NULL,
+	brand_id INTEGER NOT NULL,
+    	product_id INTEGER NOT NULL,
+	issued_qty INTEGER(10) NOT NULL,
+	issued_date VARCHAR(30) NOT NULL,
+    	CONSTRAINT issued_items_pk PRIMARY KEY(issued_items_id),
+   	CONSTRAINT user_issued_items_fk FOREIGN KEY(user_id) REFERENCES users_details(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT category_issued_items_fk FOREIGN KEY(category_id) REFERENCES category(category_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT brand_issued_items_fk FOREIGN KEY(brand_id) REFERENCES brand(brand_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT product_issued_items_fk FOREIGN KEY(product_id) REFERENCES products(product_id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE return_items(
+	return_items_id int NOT NULL AUTO_INCREMENT,
+    	user_id INTEGER NOT NULL,
+	category_id INTEGER NOT NULL,
+	brand_id INTEGER NOT NULL,
+    	product_id INTEGER NOT NULL,
+	return_quantity INTEGER(10) NOT NULL,
+	return_date VARCHAR(30) NOT NULL,
+	status VARCHAR(10) NOT NULL,
+    	CONSTRAINT return_items_pk PRIMARY KEY(return_items_id),
+   	CONSTRAINT user_return_items_fk FOREIGN KEY(user_id) REFERENCES users_details(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT category_return_items_fk FOREIGN KEY(category_id) REFERENCES category(category_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT brand_return_items_fk FOREIGN KEY(brand_id) REFERENCES brand(brand_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT product_return_items_fk FOREIGN KEY(product_id) REFERENCES products(product_id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+//Add Column in Table
+ALTER TABLE `category` ADD `category_status` VARCHAR(8) NOT NULL AFTER `category_name`;
+// Reset Auto Increment in Table
+ALTER TABLE category AUTO_INCREMENT = 1
+// ALTER TABLE brand drop column brand_status ;
+//ALTER TABLE products drop FOREIGN KEY user_product_fk ;
+ALTER TABLE products drop INDEX user_product_fk ;
